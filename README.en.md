@@ -38,16 +38,11 @@ The recommended Python stack includes:
 
 `example/lung-cancer` provides a fully synthetic lung cancer risk analysis example. The workflow covers data checks, Table 1, t-test, logistic regression, ROC/AUC, and figure generation, making it a practical smoke test for the project medical statistics analysis workflow.
 
-Run from the repository root:
-
-```bash
-python3 example/lung-cancer/analysis/analysis.py
-```
-
-Install dependencies if needed:
+From the repository root, install the example dependencies first and then run the analysis:
 
 ```bash
 python3 -m pip install -r requirements.txt
+python3 example/lung-cancer/analysis/analysis.py
 ```
 
 ## Install
