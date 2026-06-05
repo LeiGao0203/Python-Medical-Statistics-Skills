@@ -55,7 +55,13 @@ archive_file="$tmp_dir/source.tar.gz"
 (cd "$archive_root" && tar -czf "$archive_file" Python-Medical-Statistics-Skills-main)
 
 archive_target="$tmp_dir/archive-skills"
-PY_MED_STATS_ARCHIVE_URL="file://$archive_file" AGENT_SKILLS_DIR="$archive_target" bash -s < "$repo_root/install.sh"
+archive_run_dir="$tmp_dir/archive-run"
+mkdir -p "$archive_run_dir"
+if (cd "$archive_run_dir" && PY_MED_STATS_ARCHIVE_URL="file://$tmp_dir/missing.tar.gz" AGENT_SKILLS_DIR="$archive_target" bash -s < "$repo_root/install.sh") >/dev/null 2>&1; then
+  printf 'Expected archive install to fail with a missing archive URL\n' >&2
+  exit 1
+fi
+(cd "$archive_run_dir" && PY_MED_STATS_ARCHIVE_URL="file://$archive_file" AGENT_SKILLS_DIR="$archive_target" bash -s < "$repo_root/install.sh")
 assert_all_skills "$archive_target"
 
 printf 'install_test.sh passed
