@@ -1,6 +1,6 @@
 # Synthetic Lung Cancer Risk Analysis Example
 
-This example is a fully synthetic lung cancer risk analysis workflow. It does not use an external clinical dataset, so it avoids dataset licensing constraints and can be run reproducibly from a clean checkout.
+This example is a fully synthetic lung cancer risk analysis workflow. It does not use an external clinical dataset, so it avoids dataset licensing constraints. The synthetic dataset is deterministic, and `requirements.txt` uses bounded dependency ranges for more stable clean-checkout runs.
 
 The script creates `example/lung-cancer/data/synthetic_lung_cancer.csv` when it is missing, then reloads it for analysis. The generated dataset contains demographic, exposure, symptom, and clinical-risk variables such as age, sex, smoking pack-years, COPD history, asbestos exposure, family history, chronic cough, and unintentional weight loss. The binary `lung_cancer` outcome is simulated from a fixed logistic-risk model with a deterministic random seed.
 
