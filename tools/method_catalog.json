@@ -14,7 +14,13 @@
       "There are more than two groups; use ANOVA or a regression model instead.",
       "The design requires covariate adjustment, clustering, or repeated-measures modeling."
     ],
-    "dependencies": ["pandas", "numpy", "scipy", "statsmodels", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scipy",
+      "statsmodels",
+      "seaborn"
+    ],
     "assumptions": [
       "Continuous outcome measured on a comparable scale.",
       "Independent observations for independent-sample tests.",
@@ -38,7 +44,13 @@
       "Repeated measures or clustered observations require mixed models.",
       "Severe non-normality or variance heterogeneity makes nonparametric or robust methods more appropriate."
     ],
-    "dependencies": ["pandas", "numpy", "statsmodels", "scipy", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "statsmodels",
+      "scipy",
+      "seaborn"
+    ],
     "assumptions": [
       "Continuous outcome with independent observations.",
       "Approximately normal residuals within model groups.",
@@ -62,7 +74,12 @@
       "The endpoint needs covariate adjustment; use logistic regression.",
       "Rows are paired or repeated observations; use a paired categorical method."
     ],
-    "dependencies": ["pandas", "numpy", "scipy", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scipy",
+      "seaborn"
+    ],
     "assumptions": [
       "Observations are independent.",
       "Categories are mutually exclusive and correctly coded.",
@@ -86,7 +103,13 @@
       "The association is nonlinear without a monotonic relationship.",
       "Repeated measures from the same patient require clustered or mixed methods."
     ],
-    "dependencies": ["pandas", "numpy", "scipy", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scipy",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Pairs of observations are independent.",
       "Pearson correlation assumes an approximately linear relationship.",
@@ -110,7 +133,12 @@
       "The outcome is binary or categorical.",
       "Large sample parametric models with diagnostics are more informative for the target estimand."
     ],
-    "dependencies": ["pandas", "numpy", "scipy", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scipy",
+      "seaborn"
+    ],
     "assumptions": [
       "Observations are independent unless using paired Wilcoxon.",
       "Rank-based tests compare distributions and may not be simple median tests.",
@@ -134,7 +162,13 @@
       "Calibration or clinical utility is the primary question.",
       "Class labels or score direction are uncertain."
     ],
-    "dependencies": ["pandas", "numpy", "scikit-learn", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Binary outcome is coded consistently as 0/1 or false/true.",
       "Higher scores should correspond to higher event risk, or direction is explicitly reversed.",
@@ -158,7 +192,10 @@
       "Inputs are not clinically justified or are based only on desired significance.",
       "Regulatory or protocol work needs a statistician-approved calculation plan."
     ],
-    "dependencies": ["numpy", "statsmodels"],
+    "dependencies": [
+      "numpy",
+      "statsmodels"
+    ],
     "assumptions": [
       "Primary endpoint, allocation ratio, alpha, power, and effect size are pre-specified.",
       "Effect sizes come from clinically meaningful differences or reliable prior data.",
@@ -182,7 +219,13 @@
       "Events are too sparse for the number of predictors.",
       "Data are clustered or longitudinal without a plan for correlated outcomes."
     ],
-    "dependencies": ["pandas", "numpy", "statsmodels", "scikit-learn", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "statsmodels",
+      "scikit-learn",
+      "seaborn"
+    ],
     "assumptions": [
       "Binary outcome is correctly coded.",
       "Predictors are pre-specified and clinically meaningful.",
@@ -206,7 +249,13 @@
       "Repeated measures or clustered data require mixed or generalized estimating equations.",
       "Important nonlinear relationships are present but not modeled."
     ],
-    "dependencies": ["pandas", "numpy", "statsmodels", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "statsmodels",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Continuous outcome with approximately linear predictor relationships.",
       "Independent observations.",
@@ -230,7 +279,13 @@
       "Competing risks are central and require competing-risk methods.",
       "Proportional hazards are clearly violated without a planned alternative."
     ],
-    "dependencies": ["pandas", "numpy", "lifelines", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "lifelines",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Time origin, event definition, and censoring rules are defined.",
       "Censoring is non-informative conditional on included covariates.",
@@ -254,7 +309,13 @@
       "The goal is supervised prediction; use a supervised modeling workflow.",
       "Interpretability of original variables is more important than dimension reduction."
     ],
-    "dependencies": ["pandas", "numpy", "scikit-learn", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Features are numeric and measured before outcomes when used for prediction.",
       "Variables are standardized before PCA unless scale intentionally carries meaning.",
@@ -278,7 +339,14 @@
       "Important confounders are missing or measured after treatment.",
       "There is poor overlap or positivity violation between treatment groups."
     ],
-    "dependencies": ["pandas", "numpy", "statsmodels", "scikit-learn", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "statsmodels",
+      "scikit-learn",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "All key confounders are measured before treatment.",
       "Treatment groups have sufficient propensity score overlap.",
@@ -302,7 +370,13 @@
       "Sample sizes or event counts are too small for stable subgroup estimates.",
       "Multiple testing and interaction interpretation are not addressed."
     ],
-    "dependencies": ["pandas", "numpy", "statsmodels", "matplotlib", "seaborn"],
+    "dependencies": [
+      "pandas",
+      "numpy",
+      "statsmodels",
+      "matplotlib",
+      "seaborn"
+    ],
     "assumptions": [
       "Subgroups are pre-specified and clinically meaningful.",
       "Interaction terms are interpreted on the model's scale.",
