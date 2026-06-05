@@ -54,8 +54,7 @@ def main() -> None:
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(notebook, ensure_ascii=False, indent=2) + "
-", encoding="utf-8")
+    out.write_text(json.dumps(notebook, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {out}")
 
 
