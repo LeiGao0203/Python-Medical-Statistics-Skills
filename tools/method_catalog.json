@@ -202,7 +202,14 @@
       "Dropout, missingness, and design effects are added after base sample size calculation.",
       "One-sided versus two-sided testing is justified."
     ],
-    "example": "from statsmodels.stats.power import TTestIndPower\n\nanalysis = TTestIndPower()\n# Cohen's d = clinically meaningful mean difference / pooled SD\nn_per_group = analysis.solve_power(effect_size=0.5, alpha=0.05, power=0.8, ratio=1.0, alternative=\"two-sided\")\nprint(f\"Required sample size per group: {n_per_group:.1f}\")"
+    "example": "from statsmodels.stats.power import TTestIndPower\n\nanalysis = TTestIndPower()\n# Cohen's d = clinically meaningful mean difference / pooled SD\nn_per_group = analysis.solve_power(effect_size=0.5, alpha=0.05, power=0.8, ratio=1.0, alternative=\"two-sided\")\nprint(f\"Required sample size per group: {n_per_group:.1f}\")",
+    "workflow": [
+      "Define the endpoint, primary comparison, alpha, target power, allocation ratio, and planned test before calculating sample size.",
+      "Justify the clinically meaningful effect size from prior literature, pilot data, or clinical consensus.",
+      "Choose the statsmodels power class that matches the design, such as TTestIndPower for two independent means.",
+      "Adjust for dropout, unequal allocation, clustering, repeated measures, or design effects when the planned design requires it.",
+      "Report every assumption clearly so reviewers can reproduce and challenge the calculation."
+    ]
   },
   {
     "path": "advanced-stats/logistic-reg/SKILL.md",
@@ -290,9 +297,10 @@
       "Time origin, event definition, and censoring rules are defined.",
       "Censoring is non-informative conditional on included covariates.",
       "Cox models assume proportional hazards unless time-varying effects are modeled.",
-      "Follow-up units are consistent across records."
+      "Follow-up units are consistent across records.",
+      "Categorical Cox covariates are encoded before fitting."
     ],
-    "example": "import pandas as pd\nfrom lifelines import CoxPHFitter, KaplanMeierFitter\n\n# df contains columns: followup_months, event, treatment, age\nkmf = KaplanMeierFitter()\nfor group, part in df.groupby(\"treatment\"):\n    kmf.fit(part[\"followup_months\"], event_observed=part[\"event\"], label=str(group))\n    print(kmf.survival_function_.tail(1))\n\ncph = CoxPHFitter()\ncph.fit(df[[\"followup_months\", \"event\", \"treatment\", \"age\"]], duration_col=\"followup_months\", event_col=\"event\")\ncph.print_summary()"
+    "example": "import pandas as pd\nfrom lifelines import CoxPHFitter, KaplanMeierFitter\n\n# df contains columns: followup_months, event, treatment, age\nkmf = KaplanMeierFitter()\nfor group, part in df.groupby(\"treatment\"):\n    kmf.fit(part[\"followup_months\"], event_observed=part[\"event\"], label=str(group))\n    print(kmf.survival_function_.tail(1))\n\ncox_df = pd.get_dummies(df[[\"followup_months\", \"event\", \"treatment\", \"age\"]], columns=[\"treatment\"], drop_first=True)\ncph = CoxPHFitter()\ncph.fit(cox_df, duration_col=\"followup_months\", event_col=\"event\")\ncph.print_summary()"
   },
   {
     "path": "advanced-stats/pca/SKILL.md",

@@ -30,12 +30,11 @@ Use Python-native libraries for this workflow: `numpy`, `statsmodels`.
 
 ## Standard workflow
 
-1. Confirm the clinical question, endpoint, exposure or grouping variable, and analysis population.
-2. Load data with `pandas`, check missingness, coding, outliers, and clinically impossible values.
-3. Choose the method variant that matches the design and assumptions.
-4. Run the Python analysis with transparent preprocessing and deterministic settings where relevant.
-5. Inspect diagnostics, assumption checks, and sensitivity analyses before interpreting estimates.
-6. Save tables and figures that can be reproduced from the same script or notebook.
+1. Define the endpoint, primary comparison, alpha, target power, allocation ratio, and planned test before calculating sample size.
+2. Justify the clinically meaningful effect size from prior literature, pilot data, or clinical consensus.
+3. Choose the statsmodels power class that matches the design, such as TTestIndPower for two independent means.
+4. Adjust for dropout, unequal allocation, clustering, repeated measures, or design effects when the planned design requires it.
+5. Report every assumption clearly so reviewers can reproduce and challenge the calculation.
 
 ## Minimal Python example
 

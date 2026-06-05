@@ -27,6 +27,7 @@ Use Python-native libraries for this workflow: `pandas`, `numpy`, `lifelines`, `
 - Censoring is non-informative conditional on included covariates.
 - Cox models assume proportional hazards unless time-varying effects are modeled.
 - Follow-up units are consistent across records.
+- Categorical Cox covariates are encoded before fitting.
 
 ## Standard workflow
 
@@ -49,8 +50,9 @@ for group, part in df.groupby("treatment"):
     kmf.fit(part["followup_months"], event_observed=part["event"], label=str(group))
     print(kmf.survival_function_.tail(1))
 
+cox_df = pd.get_dummies(df[["followup_months", "event", "treatment", "age"]], columns=["treatment"], drop_first=True)
 cph = CoxPHFitter()
-cph.fit(df[["followup_months", "event", "treatment", "age"]], duration_col="followup_months", event_col="event")
+cph.fit(cox_df, duration_col="followup_months", event_col="event")
 cph.print_summary()
 ```
 

@@ -9,6 +9,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "tools" / "method_catalog.json"
+REQUIRED_KEYS = {
+    "path",
+    "name",
+    "title",
+    "description",
+    "use",
+    "skip",
+    "dependencies",
+    "assumptions",
+    "example",
+}
+STRING_KEYS = {"path", "name", "title", "description", "example"}
+LIST_KEYS = {"use", "skip", "dependencies", "assumptions", "workflow"}
 
 
 def yaml_quote(value: str) -> str:
@@ -19,12 +32,54 @@ def bullet_list(items: list[str]) -> str:
     return "\n".join(f"- {item}" for item in items)
 
 
-def render_skill(item: dict[str, object]) -> str:
-    dependencies = item["dependencies"]
-    if not isinstance(dependencies, list):
-        raise TypeError(f"{item['path']} dependencies must be a list")
+def validate_list_of_strings(item: dict[str, object], key: str) -> None:
+    value = item.get(key)
+    if not isinstance(value, list) or not value:
+        raise TypeError(f"{item.get('path', '<unknown>')} {key} must be a non-empty list")
+    if not all(isinstance(part, str) and part.strip() for part in value):
+        raise TypeError(f"{item.get('path', '<unknown>')} {key} must contain only non-empty strings")
 
-    dependency_text = ", ".join(f"`{dependency}`" for dependency in dependencies)
+
+def validate_item(item: dict[str, object]) -> None:
+    missing = sorted(REQUIRED_KEYS - set(item))
+    if missing:
+        raise KeyError(f"catalog item missing required keys: {', '.join(missing)}")
+
+    for key in STRING_KEYS:
+        value = item[key]
+        if not isinstance(value, str) or not value.strip():
+            raise TypeError(f"{item.get('path', '<unknown>')} {key} must be a non-empty string")
+
+    for key in LIST_KEYS:
+        if key in item:
+            validate_list_of_strings(item, key)
+
+    relative_path = Path(str(item["path"]))
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        raise ValueError(f"Refusing unsafe path: {relative_path}")
+    if relative_path.name != "SKILL.md":
+        raise ValueError(f"{relative_path} must end in SKILL.md")
+    if "```" in str(item["example"]):
+        raise ValueError(f"{relative_path} example must not contain fenced code markers")
+
+
+def workflow_steps(item: dict[str, object]) -> str:
+    default_steps = [
+        "Confirm the clinical question, endpoint, exposure or grouping variable, and analysis population.",
+        "Load data with `pandas`, check missingness, coding, outliers, and clinically impossible values.",
+        "Choose the method variant that matches the design and assumptions.",
+        "Run the Python analysis with transparent preprocessing and deterministic settings where relevant.",
+        "Inspect diagnostics, assumption checks, and sensitivity analyses before interpreting estimates.",
+        "Save tables and figures that can be reproduced from the same script or notebook.",
+    ]
+    steps = item.get("workflow", default_steps)
+    return "\n".join(f"{index}. {step}" for index, step in enumerate(steps, start=1))
+
+
+def render_skill(item: dict[str, object]) -> str:
+    validate_item(item)
+
+    dependency_text = ", ".join(f"`{dependency}`" for dependency in item["dependencies"])
 
     return f"""---
 name: {yaml_quote(str(item["name"]))}
@@ -51,12 +106,7 @@ Use Python-native libraries for this workflow: {dependency_text}.
 
 ## Standard workflow
 
-1. Confirm the clinical question, endpoint, exposure or grouping variable, and analysis population.
-2. Load data with `pandas`, check missingness, coding, outliers, and clinically impossible values.
-3. Choose the method variant that matches the design and assumptions.
-4. Run the Python analysis with transparent preprocessing and deterministic settings where relevant.
-5. Inspect diagnostics, assumption checks, and sensitivity analyses before interpreting estimates.
-6. Save tables and figures that can be reproduced from the same script or notebook.
+{workflow_steps(item)}
 
 ## Minimal Python example
 
@@ -76,6 +126,8 @@ def load_catalog() -> list[dict[str, object]]:
 
     if not isinstance(catalog, list):
         raise TypeError("method_catalog.json must contain a JSON array")
+    for item in catalog:
+        validate_item(item)
     return catalog
 
 
