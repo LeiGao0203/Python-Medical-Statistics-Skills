@@ -38,16 +38,11 @@ Python Medical Statistics Skills 是一组面向 AI coding agent 的医学统计
 
 `example/lung-cancer` 提供一个完全合成的肺癌风险分析示例。该示例覆盖数据检查、Table 1、t 检验、logistic 回归、ROC/AUC 和图形生成，适合用来验证本项目的医学统计分析工作流。
 
-从仓库根目录运行：
-
-```bash
-python3 example/lung-cancer/analysis/analysis.py
-```
-
-如需安装依赖：
+从仓库根目录先安装示例依赖，再运行分析：
 
 ```bash
 python3 -m pip install -r requirements.txt
+python3 example/lung-cancer/analysis/analysis.py
 ```
 
 ## 安装
