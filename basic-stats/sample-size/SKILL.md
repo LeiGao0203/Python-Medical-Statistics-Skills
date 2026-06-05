@@ -49,4 +49,4 @@ print(f"Required sample size per group: {n_per_group:.1f}")
 
 ## Reporting guidance
 
-Report the analysis population, missing-data handling, method variant, effect estimate, confidence interval when available, test statistic or model summary, p-value, and any assumption checks or limitations. Use clinical units and clinically meaningful labels rather than raw column names.
+Report the target power, alpha, sidedness, allocation ratio, assumed effect size, variability or baseline rate, statistical test, dropout or design-effect inflation, and resulting sample size per group and total. State that the calculation is prospective planning rather than evidence of an observed treatment effect.

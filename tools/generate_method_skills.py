@@ -21,6 +21,7 @@ REQUIRED_KEYS = {
     "example",
 }
 STRING_KEYS = {"path", "name", "title", "description", "example"}
+OPTIONAL_STRING_KEYS = {"reporting"}
 LIST_KEYS = {"use", "skip", "dependencies", "assumptions", "workflow"}
 
 
@@ -48,6 +49,10 @@ def validate_item(item: dict[str, object]) -> None:
     for key in STRING_KEYS:
         value = item[key]
         if not isinstance(value, str) or not value.strip():
+            raise TypeError(f"{item.get('path', '<unknown>')} {key} must be a non-empty string")
+
+    for key in OPTIONAL_STRING_KEYS:
+        if key in item and (not isinstance(item[key], str) or not item[key].strip()):
             raise TypeError(f"{item.get('path', '<unknown>')} {key} must be a non-empty string")
 
     for key in LIST_KEYS:
@@ -116,7 +121,7 @@ Use Python-native libraries for this workflow: {dependency_text}.
 
 ## Reporting guidance
 
-Report the analysis population, missing-data handling, method variant, effect estimate, confidence interval when available, test statistic or model summary, p-value, and any assumption checks or limitations. Use clinical units and clinically meaningful labels rather than raw column names.
+{item.get("reporting", "Report the analysis population, missing-data handling, method variant, effect estimate, confidence interval when available, test statistic or model summary, p-value, and any assumption checks or limitations. Use clinical units and clinically meaningful labels rather than raw column names.")}
 """
 
 

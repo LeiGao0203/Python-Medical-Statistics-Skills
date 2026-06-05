@@ -209,7 +209,8 @@
       "Choose the statsmodels power class that matches the design, such as TTestIndPower for two independent means.",
       "Adjust for dropout, unequal allocation, clustering, repeated measures, or design effects when the planned design requires it.",
       "Report every assumption clearly so reviewers can reproduce and challenge the calculation."
-    ]
+    ],
+    "reporting": "Report the target power, alpha, sidedness, allocation ratio, assumed effect size, variability or baseline rate, statistical test, dropout or design-effect inflation, and resulting sample size per group and total. State that the calculation is prospective planning rather than evidence of an observed treatment effect."
   },
   {
     "path": "advanced-stats/logistic-reg/SKILL.md",
