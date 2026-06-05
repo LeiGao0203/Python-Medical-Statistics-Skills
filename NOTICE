@@ -1,0 +1,11 @@
+Python Medical Statistics Skills
+
+This repository contains original Python-oriented workflow skills, examples,
+installer scripts, notebook templates, and documentation released under the
+Apache License 2.0 unless a file states otherwise.
+
+Some medical-statistics method guidance may be adapted from the companion
+R Medical Statistics Skills project and from the open source R_medical_stat
+materials by 阿越就是我. Those adapted method-guidance portions are attributed
+and treated as CC BY-SA 4.0 compatible content. Reusers should preserve source
+attribution and license notices when redistributing or adapting those portions.
