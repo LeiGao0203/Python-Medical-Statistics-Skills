@@ -39,7 +39,7 @@ AGENT_SKILLS_DIR="$target_local" bash "$repo_root/install.sh"
 assert_all_skills "$target_local"
 
 source_target="$tmp_dir/source-skills"
-RUNTIME_SOURCE="$repo_root" AGENT_SKILLS_DIR="$source_target" PY_MED_STATS_SOURCE="$repo_root" bash "$repo_root/install.sh"
+AGENT_SKILLS_DIR="$source_target" PY_MED_STATS_SOURCE="$repo_root" bash "$repo_root/install.sh"
 assert_all_skills "$source_target"
 
 archive_root="$tmp_dir/archive-root"
@@ -55,7 +55,7 @@ archive_file="$tmp_dir/source.tar.gz"
 (cd "$archive_root" && tar -czf "$archive_file" Python-Medical-Statistics-Skills-main)
 
 archive_target="$tmp_dir/archive-skills"
-PY_MED_STATS_ARCHIVE_URL="file://$archive_file" AGENT_SKILLS_DIR="$archive_target" bash "$repo_root/install.sh"
+PY_MED_STATS_ARCHIVE_URL="file://$archive_file" AGENT_SKILLS_DIR="$archive_target" bash -s < "$repo_root/install.sh"
 assert_all_skills "$archive_target"
 
 printf 'install_test.sh passed
