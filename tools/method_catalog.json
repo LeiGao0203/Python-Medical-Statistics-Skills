@@ -1,0 +1,314 @@
+[
+  {
+    "path": "basic-stats/ttest/SKILL.md",
+    "name": "medical-stat-python-ttest",
+    "title": "Python T-Test Skill",
+    "description": "Use for medical statistics in Python when comparing continuous outcomes between two groups, paired pre/post measurements, or one-sample means using scipy t-test workflows.",
+    "use": [
+      "Compare a continuous medical outcome between two independent groups.",
+      "Analyze paired measurements such as baseline and follow-up values.",
+      "Estimate and report mean differences with confidence intervals when assumptions are reasonable."
+    ],
+    "skip": [
+      "Outcome is ordinal, highly skewed, or dominated by outliers without a robust plan.",
+      "There are more than two groups; use ANOVA or a regression model instead.",
+      "The design requires covariate adjustment, clustering, or repeated-measures modeling."
+    ],
+    "dependencies": ["pandas", "numpy", "scipy", "statsmodels", "seaborn"],
+    "assumptions": [
+      "Continuous outcome measured on a comparable scale.",
+      "Independent observations for independent-sample tests.",
+      "Approximately normal residuals within groups, especially for small samples.",
+      "Use Welch's test when group variances are not assumed equal."
+    ],
+    "example": "import numpy as np\nimport pandas as pd\nfrom scipy import stats\n\n# df contains columns: treatment_group, systolic_bp\nactive = df.loc[df[\"treatment_group\"] == \"active\", \"systolic_bp\"].dropna()\ncontrol = df.loc[df[\"treatment_group\"] == \"control\", \"systolic_bp\"].dropna()\n\nresult = stats.ttest_ind(active, control, equal_var=False)\nmean_diff = active.mean() - control.mean()\nprint(f\"Welch t-test mean difference: {mean_diff:.2f}\")\nprint(f\"t={result.statistic:.3f}, p={result.pvalue:.4f}\")"
+  },
+  {
+    "path": "basic-stats/anova/SKILL.md",
+    "name": "medical-stat-python-anova",
+    "title": "Python ANOVA Skill",
+    "description": "Use for medical statistics in Python when comparing a continuous endpoint across three or more groups with statsmodels ANOVA workflows.",
+    "use": [
+      "Compare a continuous endpoint across three or more independent clinical groups.",
+      "Evaluate a categorical exposure with multiple levels in an OLS model.",
+      "Support post-hoc comparisons after an overall group effect is tested."
+    ],
+    "skip": [
+      "The outcome is binary, ordinal, count, or time-to-event.",
+      "Repeated measures or clustered observations require mixed models.",
+      "Severe non-normality or variance heterogeneity makes nonparametric or robust methods more appropriate."
+    ],
+    "dependencies": ["pandas", "numpy", "statsmodels", "scipy", "seaborn"],
+    "assumptions": [
+      "Continuous outcome with independent observations.",
+      "Approximately normal residuals within model groups.",
+      "Reasonably homogeneous variances or a justified robust alternative.",
+      "Group coding is categorical and reference levels are clinically meaningful."
+    ],
+    "example": "import pandas as pd\nimport statsmodels.api as sm\nfrom statsmodels.formula.api import ols\n\n# df contains columns: dose_group, ldl_change\nmodel = ols(\"ldl_change ~ C(dose_group)\", data=df).fit()\nanova_table = sm.stats.anova_lm(model, typ=2)\nprint(anova_table)\n\nprint(model.summary())"
+  },
+  {
+    "path": "basic-stats/chisq/SKILL.md",
+    "name": "medical-stat-python-chisq",
+    "title": "Python Chi-Square Skill",
+    "description": "Use for medical statistics in Python when testing associations between categorical variables with pandas crosstabs and scipy chi-square or Fisher exact methods.",
+    "use": [
+      "Test association between two categorical clinical variables.",
+      "Compare event proportions across treatment or exposure groups.",
+      "Create contingency tables for manuscript-ready baseline or outcome reporting."
+    ],
+    "skip": [
+      "Expected cell counts are too small for chi-square; use Fisher exact for small 2x2 tables.",
+      "The endpoint needs covariate adjustment; use logistic regression.",
+      "Rows are paired or repeated observations; use a paired categorical method."
+    ],
+    "dependencies": ["pandas", "numpy", "scipy", "seaborn"],
+    "assumptions": [
+      "Observations are independent.",
+      "Categories are mutually exclusive and correctly coded.",
+      "Expected counts are adequate for chi-square approximation.",
+      "For sparse 2x2 tables, Fisher exact is preferred."
+    ],
+    "example": "import pandas as pd\nfrom scipy import stats\n\n# df contains columns: treatment_group, response\nobserved = pd.crosstab(df[\"treatment_group\"], df[\"response\"])\nchi2, p_value, dof, expected = stats.chi2_contingency(observed)\nprint(observed)\nprint(f\"chi2={chi2:.3f}, df={dof}, p={p_value:.4f}\")\n\nif observed.shape == (2, 2) and (expected < 5).any():\n    odds_ratio, fisher_p = stats.fisher_exact(observed)\n    print(f\"Fisher exact OR={odds_ratio:.3f}, p={fisher_p:.4f}\")"
+  },
+  {
+    "path": "basic-stats/correlation/SKILL.md",
+    "name": "medical-stat-python-correlation",
+    "title": "Python Correlation Skill",
+    "description": "Use for medical statistics in Python when measuring association between two continuous or ordinal variables with Pearson or Spearman correlation.",
+    "use": [
+      "Quantify association between two continuous biomarkers or measurements.",
+      "Use Spearman correlation for monotonic ordinal or non-normal relationships.",
+      "Prepare correlation estimates with confidence intervals and scatterplots."
+    ],
+    "skip": [
+      "The goal is prediction, adjustment, or causal estimation; use regression.",
+      "The association is nonlinear without a monotonic relationship.",
+      "Repeated measures from the same patient require clustered or mixed methods."
+    ],
+    "dependencies": ["pandas", "numpy", "scipy", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Pairs of observations are independent.",
+      "Pearson correlation assumes an approximately linear relationship.",
+      "Spearman correlation evaluates monotonic rank association.",
+      "Outliers and missingness have been inspected."
+    ],
+    "example": "import pandas as pd\nfrom scipy import stats\n\n# df contains columns: bmi, fasting_glucose\npairs = df[[\"bmi\", \"fasting_glucose\"]].dropna()\npearson_r, pearson_p = stats.pearsonr(pairs[\"bmi\"], pairs[\"fasting_glucose\"])\nspearman_r, spearman_p = stats.spearmanr(pairs[\"bmi\"], pairs[\"fasting_glucose\"])\nprint(f\"Pearson r={pearson_r:.3f}, p={pearson_p:.4f}\")\nprint(f\"Spearman rho={spearman_r:.3f}, p={spearman_p:.4f}\")"
+  },
+  {
+    "path": "basic-stats/nonparametric/SKILL.md",
+    "name": "medical-stat-python-nonparametric",
+    "title": "Python Nonparametric Tests Skill",
+    "description": "Use for medical statistics in Python when continuous or ordinal outcomes need rank-based scipy tests such as Mann-Whitney U, Wilcoxon, or Kruskal-Wallis.",
+    "use": [
+      "Compare skewed continuous or ordinal outcomes between independent groups.",
+      "Analyze paired non-normal measurements with Wilcoxon signed-rank.",
+      "Compare three or more independent groups with Kruskal-Wallis."
+    ],
+    "skip": [
+      "The clinical question needs adjusted estimates or covariate control.",
+      "The outcome is binary or categorical.",
+      "Large sample parametric models with diagnostics are more informative for the target estimand."
+    ],
+    "dependencies": ["pandas", "numpy", "scipy", "seaborn"],
+    "assumptions": [
+      "Observations are independent unless using paired Wilcoxon.",
+      "Rank-based tests compare distributions and may not be simple median tests.",
+      "Groups are defined before looking at outcomes.",
+      "Ties and zero differences are handled consistently."
+    ],
+    "example": "import pandas as pd\nfrom scipy import stats\n\n# df contains columns: treatment_group, pain_score\ntreated = df.loc[df[\"treatment_group\"] == \"treated\", \"pain_score\"].dropna()\ncontrol = df.loc[df[\"treatment_group\"] == \"control\", \"pain_score\"].dropna()\n\nmw = stats.mannwhitneyu(treated, control, alternative=\"two-sided\")\nprint(f\"Mann-Whitney U={mw.statistic:.1f}, p={mw.pvalue:.4f}\")\n\n# For three groups:\ngroups = [g[\"pain_score\"].dropna() for _, g in df.groupby(\"dose_group\")]\nkw = stats.kruskal(*groups)\nprint(f\"Kruskal-Wallis H={kw.statistic:.3f}, p={kw.pvalue:.4f}\")"
+  },
+  {
+    "path": "basic-stats/roc/SKILL.md",
+    "name": "medical-stat-python-roc",
+    "title": "Python ROC Analysis Skill",
+    "description": "Use for medical statistics in Python when evaluating diagnostic or prediction scores with ROC curves, AUC, sensitivity, and specificity.",
+    "use": [
+      "Evaluate discrimination of a biomarker, risk score, or classifier for a binary clinical outcome.",
+      "Estimate AUC and decision thresholds.",
+      "Create ROC plots and threshold tables for reports."
+    ],
+    "skip": [
+      "The outcome is time-to-event without a fixed prediction horizon.",
+      "Calibration or clinical utility is the primary question.",
+      "Class labels or score direction are uncertain."
+    ],
+    "dependencies": ["pandas", "numpy", "scikit-learn", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Binary outcome is coded consistently as 0/1 or false/true.",
+      "Higher scores should correspond to higher event risk, or direction is explicitly reversed.",
+      "Evaluation data are independent of model training data when reporting performance.",
+      "AUC uncertainty or validation strategy is documented for manuscripts."
+    ],
+    "example": "import pandas as pd\nfrom sklearn.metrics import roc_auc_score, roc_curve\n\n# df contains columns: disease_status (0/1), risk_score\ny_true = df[\"disease_status\"].astype(int)\ny_score = df[\"risk_score\"]\n\nauc = roc_auc_score(y_true, y_score)\nfpr, tpr, thresholds = roc_curve(y_true, y_score)\nroc_table = pd.DataFrame({\"threshold\": thresholds, \"sensitivity\": tpr, \"specificity\": 1 - fpr})\nprint(f\"AUC={auc:.3f}\")\nprint(roc_table.head())"
+  },
+  {
+    "path": "basic-stats/sample-size/SKILL.md",
+    "name": "medical-stat-python-sample-size",
+    "title": "Python Sample Size Skill",
+    "description": "Use for medical statistics in Python when planning power or sample size with statsmodels.stats.power for t-tests, proportions, or ANOVA.",
+    "use": [
+      "Estimate sample size for planned medical studies.",
+      "Compute achieved power for simple designs.",
+      "Translate clinically meaningful differences into standardized effect sizes."
+    ],
+    "skip": [
+      "Complex clustered, adaptive, survival, or noninferiority designs require specialized methods.",
+      "Inputs are not clinically justified or are based only on desired significance.",
+      "Regulatory or protocol work needs a statistician-approved calculation plan."
+    ],
+    "dependencies": ["numpy", "statsmodels"],
+    "assumptions": [
+      "Primary endpoint, allocation ratio, alpha, power, and effect size are pre-specified.",
+      "Effect sizes come from clinically meaningful differences or reliable prior data.",
+      "Dropout, missingness, and design effects are added after base sample size calculation.",
+      "One-sided versus two-sided testing is justified."
+    ],
+    "example": "from statsmodels.stats.power import TTestIndPower\n\nanalysis = TTestIndPower()\n# Cohen's d = clinically meaningful mean difference / pooled SD\nn_per_group = analysis.solve_power(effect_size=0.5, alpha=0.05, power=0.8, ratio=1.0, alternative=\"two-sided\")\nprint(f\"Required sample size per group: {n_per_group:.1f}\")"
+  },
+  {
+    "path": "advanced-stats/logistic-reg/SKILL.md",
+    "name": "medical-stat-python-logistic-reg",
+    "title": "Python Logistic Regression Skill",
+    "description": "Use for medical statistics in Python when modeling binary clinical outcomes with statsmodels logistic regression and reporting odds ratios.",
+    "use": [
+      "Model binary outcomes such as response, complication, or mortality.",
+      "Estimate adjusted odds ratios for exposures and covariates.",
+      "Assess interaction terms or subgroup effects on the log-odds scale."
+    ],
+    "skip": [
+      "Outcome is common and risk ratios are required without approximation.",
+      "Events are too sparse for the number of predictors.",
+      "Data are clustered or longitudinal without a plan for correlated outcomes."
+    ],
+    "dependencies": ["pandas", "numpy", "statsmodels", "scikit-learn", "seaborn"],
+    "assumptions": [
+      "Binary outcome is correctly coded.",
+      "Predictors are pre-specified and clinically meaningful.",
+      "Continuous predictors have plausible functional form on the logit scale.",
+      "No severe separation, collinearity, or overfitting."
+    ],
+    "example": "import numpy as np\nimport pandas as pd\nimport statsmodels.formula.api as smf\n\n# df contains columns: remission, treatment, age, baseline_score\nmodel = smf.logit(\"remission ~ treatment + age + baseline_score\", data=df).fit()\nparams = model.params\nconf = model.conf_int()\nodds_ratios = np.exp(params)\nci = np.exp(conf)\nsummary = pd.DataFrame({\"OR\": odds_ratios, \"CI_low\": ci[0], \"CI_high\": ci[1], \"p_value\": model.pvalues})\nprint(summary)"
+  },
+  {
+    "path": "advanced-stats/multi-reg/SKILL.md",
+    "name": "medical-stat-python-multi-reg",
+    "title": "Python Multiple Linear Regression Skill",
+    "description": "Use for medical statistics in Python when modeling continuous clinical outcomes with multivariable statsmodels OLS regression.",
+    "use": [
+      "Estimate adjusted associations with a continuous outcome.",
+      "Control for pre-specified confounders in an OLS model.",
+      "Report beta coefficients, confidence intervals, and residual diagnostics."
+    ],
+    "skip": [
+      "Outcome is binary, count, ordinal, or time-to-event.",
+      "Repeated measures or clustered data require mixed or generalized estimating equations.",
+      "Important nonlinear relationships are present but not modeled."
+    ],
+    "dependencies": ["pandas", "numpy", "statsmodels", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Continuous outcome with approximately linear predictor relationships.",
+      "Independent observations.",
+      "Residuals are reasonably homoscedastic and approximately normal for inference.",
+      "Covariates are selected based on clinical reasoning or a pre-specified analysis plan."
+    ],
+    "example": "import pandas as pd\nimport statsmodels.formula.api as smf\n\n# df contains columns: quality_score, treatment, age, baseline_score\nmodel = smf.ols(\"quality_score ~ treatment + age + baseline_score\", data=df).fit()\nprint(model.summary())\nprint(model.conf_int())"
+  },
+  {
+    "path": "advanced-stats/survival/SKILL.md",
+    "name": "medical-stat-python-survival",
+    "title": "Python Survival Analysis Skill",
+    "description": "Use for medical statistics in Python when analyzing time-to-event outcomes with lifelines Kaplan-Meier and Cox proportional hazards workflows.",
+    "use": [
+      "Estimate survival curves for time-to-event clinical outcomes.",
+      "Fit Cox proportional hazards models for adjusted hazard ratios.",
+      "Report censoring-aware estimates and survival probabilities."
+    ],
+    "skip": [
+      "Follow-up time or censoring status is unavailable or unreliable.",
+      "Competing risks are central and require competing-risk methods.",
+      "Proportional hazards are clearly violated without a planned alternative."
+    ],
+    "dependencies": ["pandas", "numpy", "lifelines", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Time origin, event definition, and censoring rules are defined.",
+      "Censoring is non-informative conditional on included covariates.",
+      "Cox models assume proportional hazards unless time-varying effects are modeled.",
+      "Follow-up units are consistent across records."
+    ],
+    "example": "import pandas as pd\nfrom lifelines import CoxPHFitter, KaplanMeierFitter\n\n# df contains columns: followup_months, event, treatment, age\nkmf = KaplanMeierFitter()\nfor group, part in df.groupby(\"treatment\"):\n    kmf.fit(part[\"followup_months\"], event_observed=part[\"event\"], label=str(group))\n    print(kmf.survival_function_.tail(1))\n\ncph = CoxPHFitter()\ncph.fit(df[[\"followup_months\", \"event\", \"treatment\", \"age\"]], duration_col=\"followup_months\", event_col=\"event\")\ncph.print_summary()"
+  },
+  {
+    "path": "advanced-stats/pca/SKILL.md",
+    "name": "medical-stat-python-pca",
+    "title": "Python PCA Skill",
+    "description": "Use for medical statistics in Python when reducing correlated biomarkers, questionnaire items, or feature sets with standardized scikit-learn PCA.",
+    "use": [
+      "Reduce many correlated continuous measurements into principal components.",
+      "Explore biomarker or questionnaire structure before downstream modeling.",
+      "Create explained-variance summaries and component loading tables."
+    ],
+    "skip": [
+      "Variables are mostly categorical or on incomparable coding scales without preprocessing.",
+      "The goal is supervised prediction; use a supervised modeling workflow.",
+      "Interpretability of original variables is more important than dimension reduction."
+    ],
+    "dependencies": ["pandas", "numpy", "scikit-learn", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Features are numeric and measured before outcomes when used for prediction.",
+      "Variables are standardized before PCA unless scale intentionally carries meaning.",
+      "Missing data are handled before fitting PCA.",
+      "Component interpretation is checked against loadings and clinical context."
+    ],
+    "example": "import pandas as pd\nfrom sklearn.decomposition import PCA\nfrom sklearn.preprocessing import StandardScaler\n\nfeatures = [\"marker_a\", \"marker_b\", \"marker_c\", \"marker_d\"]\nX = df[features].dropna()\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2, random_state=0)\nscores = pca.fit_transform(X_scaled)\nloadings = pd.DataFrame(pca.components_.T, index=features, columns=[\"PC1\", \"PC2\"])\nprint(pca.explained_variance_ratio_)\nprint(loadings)"
+  },
+  {
+    "path": "literature-stats/ps-matching/SKILL.md",
+    "name": "medical-stat-python-ps-matching",
+    "title": "Python Propensity Score Matching Skill",
+    "description": "Use for medical literature statistics in Python when estimating treatment effects in observational studies with propensity scores and nearest-neighbor matching.",
+    "use": [
+      "Estimate propensity scores for treatment assignment in observational medical data.",
+      "Perform nearest-neighbor matching and assess covariate balance.",
+      "Prepare matched cohort summaries for manuscripts."
+    ],
+    "skip": [
+      "Treatment assignment is randomized and matching is unnecessary.",
+      "Important confounders are missing or measured after treatment.",
+      "There is poor overlap or positivity violation between treatment groups."
+    ],
+    "dependencies": ["pandas", "numpy", "statsmodels", "scikit-learn", "matplotlib", "seaborn"],
+    "assumptions": [
+      "All key confounders are measured before treatment.",
+      "Treatment groups have sufficient propensity score overlap.",
+      "Matching method, caliper, replacement, and estimand are pre-specified.",
+      "Balance is checked after matching before outcome analysis."
+    ],
+    "example": "import pandas as pd\nimport statsmodels.formula.api as smf\nfrom sklearn.neighbors import NearestNeighbors\n\n# df contains: treated (0/1), age, sex, severity, outcome\nps_model = smf.logit(\"treated ~ age + sex + severity\", data=df).fit(disp=False)\ndf = df.assign(propensity=ps_model.predict(df))\n\ntreated = df[df[\"treated\"] == 1]\ncontrols = df[df[\"treated\"] == 0]\nnn = NearestNeighbors(n_neighbors=1).fit(controls[[\"propensity\"]])\ndistances, indices = nn.kneighbors(treated[[\"propensity\"]])\nmatched_controls = controls.iloc[indices.ravel()].copy()\nmatched = pd.concat([treated.reset_index(drop=True), matched_controls.reset_index(drop=True)], keys=[\"treated\", \"control\"])\nprint(matched.groupby(level=0)[\"propensity\"].describe())"
+  },
+  {
+    "path": "literature-stats/subgroup-analysis/SKILL.md",
+    "name": "medical-stat-python-subgroup-analysis",
+    "title": "Python Subgroup Analysis Skill",
+    "description": "Use for medical literature statistics in Python when estimating subgroup effects, testing interaction terms, and preparing forest-plot-ready estimates.",
+    "use": [
+      "Evaluate whether treatment effects differ across clinically defined subgroups.",
+      "Fit interaction terms rather than relying only on within-subgroup p-values.",
+      "Prepare subgroup estimates and confidence intervals for forest plots."
+    ],
+    "skip": [
+      "Subgroups were chosen after inspecting outcomes without clear exploratory labeling.",
+      "Sample sizes or event counts are too small for stable subgroup estimates.",
+      "Multiple testing and interaction interpretation are not addressed."
+    ],
+    "dependencies": ["pandas", "numpy", "statsmodels", "matplotlib", "seaborn"],
+    "assumptions": [
+      "Subgroups are pre-specified and clinically meaningful.",
+      "Interaction terms are interpreted on the model's scale.",
+      "Each subgroup has enough data to estimate effects.",
+      "Forest plots distinguish estimates from formal interaction tests."
+    ],
+    "example": "import numpy as np\nimport pandas as pd\nimport statsmodels.formula.api as smf\n\n# df contains: outcome, treatment, age_group, baseline_score\nmodel = smf.ols(\"outcome ~ treatment * C(age_group) + baseline_score\", data=df).fit()\nprint(model.summary())\n\nrows = []\nfor subgroup, part in df.groupby(\"age_group\"):\n    subgroup_model = smf.ols(\"outcome ~ treatment + baseline_score\", data=part).fit()\n    estimate = subgroup_model.params[\"treatment\"]\n    ci_low, ci_high = subgroup_model.conf_int().loc[\"treatment\"]\n    rows.append({\"subgroup\": subgroup, \"estimate\": estimate, \"ci_low\": ci_low, \"ci_high\": ci_high})\nforest_ready = pd.DataFrame(rows)\nprint(forest_ready)"
+  }
+]
