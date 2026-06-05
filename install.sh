@@ -23,6 +23,9 @@ else
   archive_file="$tmp_dir/source.tar.gz"
 
   case "$archive_url" in
+    file://localhost/*)
+      cp "/${archive_url#file://localhost/}" "$archive_file"
+      ;;
     file://*)
       cp "${archive_url#file://}" "$archive_file"
       ;;
@@ -51,12 +54,25 @@ done
 
 mkdir -p "$target_dir"
 
+install_skill_dir() {
+  src="$1"
+  name="$(basename "$src")"
+  rm -rf "$target_dir/$name"
+  cp -R "$src" "$target_dir/"
+}
+
 for category in advanced-stats basic-stats literature-stats; do
-  find "$source_dir/$category" -mindepth 1 -maxdepth 1 -type d -exec cp -R {} "$target_dir/" \;
+  find "$source_dir/$category" -mindepth 1 -maxdepth 1 -type d -exec sh -c '
+    for src do
+      name="$(basename "$src")"
+      rm -rf "$0/$name"
+      cp -R "$src" "$0/"
+    done
+  ' "$target_dir" {} +
 done
 
 for skill in python-script jupyter-notebook; do
-  cp -R "$source_dir/$skill" "$target_dir/"
+  install_skill_dir "$source_dir/$skill"
 done
 
 printf 'Installed Python Medical Statistics Skills to %s\n' "$target_dir"
