@@ -42,13 +42,17 @@ Keep the entry point clear. `analysis.py` should load data, validate inputs, run
 2. Build a top-to-bottom structure: imports, constants/paths, data loading, cleaning, validation, statistical analysis, visualization, and output writing.
 3. Use the right dependencies for the analysis: `pandas`, `numpy`, `scipy.stats`, `statsmodels`, `scikit-learn`, `lifelines`, `matplotlib`, and `seaborn` as needed.
 4. Save reproducible outputs under `outputs/`, such as cleaned data, model summaries, tables, figures, and logs.
-5. Make the script runnable from a clean shell with:
+5. Make the script runnable from a clean shell with the command that matches the chosen layout:
 
 ```bash
+# Single-file layout
 python analysis.py
+
+# Larger project layout, run from the parent folder
+python analysis/analysis.py
 ```
 
-6. Validate the script by running `python analysis.py` and fixing any runtime, path, import, or output errors.
+6. Validate the script by running the matching command and fixing any runtime, path, import, or output errors.
 
 ## Style
 
