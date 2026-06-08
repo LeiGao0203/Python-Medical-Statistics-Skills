@@ -1,5 +1,7 @@
 # Python Medical Statistics Skills
 
+![Python Medical Statistics Skills banner](docs/assets/readme-banner.png)
+
 [中文](README.md)
 
 Python Medical Statistics Skills is a collection of AI coding agent skills for medical statistics and Python data analysis. The project uses a generic `SKILL.md` structure, so it can be used by Codex and by other coding agents that support skill directories.
@@ -36,14 +38,29 @@ The recommended Python stack includes:
 
 ## Example
 
-`example/lung-cancer` provides a fully synthetic lung cancer risk analysis example. The workflow covers data checks, Table 1, t-test, logistic regression, ROC/AUC, and figure generation, making it a practical smoke test for the project medical statistics analysis workflow.
+`example/lung-cancer` is a runnable lung cancer survey analysis case using Kaggle Lung Cancer Survey style data (309 records, 16 variables, with `LUNG_CANCER` as the outcome). It shows how an agent can chain the medical statistics skills into a complete Python analysis workflow:
+
+- Data loading, column-name cleaning, binary-variable recoding, and missingness checks.
+- Table 1 stratified by lung cancer status.
+- Chi-square / Fisher exact tests for categorical variables.
+- Welch t-test and Mann-Whitney U test for age.
+- Multivariable logistic regression with OR and 95% CI output.
+- ROC/AUC, 5-fold cross-validated AUC, optimal threshold, and exported figures.
 
 From the repository root, install the example dependencies first and then run the analysis:
 
 ```bash
 python3 -m pip install -r requirements.txt
-python3 example/lung-cancer/analysis/analysis.py
+python3 example/lung-cancer/analysis/lung_cancer_analysis.py
 ```
+
+Results are written to `example/lung-cancer/analysis/outputs/kaggle_survey/`. The current example outputs include Table 1, statistical test results, logistic regression ORs, ROC threshold tables, and PNG figures. One example run produced a 5-fold cross-validated AUC of `0.9397`; significant multivariable logistic regression predictors included smoking, peer pressure, chronic disease, fatigue, allergy, coughing, and swallowing difficulty.
+
+Representative output figures:
+
+![Adjusted odds ratio forest plot](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig2_forest_plot_OR.png)
+
+![ROC curve](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig3_roc_curve.png)
 
 ## Install
 

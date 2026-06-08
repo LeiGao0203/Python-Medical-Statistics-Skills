@@ -1,5 +1,7 @@
 # Python Medical Statistics Skills
 
+![Python Medical Statistics Skills banner](docs/assets/readme-banner.png)
+
 [English](README.en.md)
 
 Python Medical Statistics Skills 是一组面向 AI coding agent 的医学统计与 Python 数据分析技能。项目采用通用 `SKILL.md` 结构，既可用于 Codex，也可被其他支持技能目录的 coding agents 读取和执行。
@@ -36,14 +38,29 @@ Python Medical Statistics Skills 是一组面向 AI coding agent 的医学统计
 
 ## 示例
 
-`example/lung-cancer` 提供一个完全合成的肺癌风险分析示例。该示例覆盖数据检查、Table 1、t 检验、logistic 回归、ROC/AUC 和图形生成，适合用来验证本项目的医学统计分析工作流。
+`example/lung-cancer` 是一个可直接运行的肺癌问卷数据分析案例，使用 Kaggle Lung Cancer Survey 风格数据（309 条记录，16 个变量，结局变量为 `LUNG_CANCER`）。它展示了 agent 如何把医学统计技能串成一条完整的 Python 分析工作流：
+
+- 数据读取、变量名清洗、二分类变量重编码和缺失值检查。
+- 按肺癌状态分层的 Table 1。
+- 分类变量的卡方检验 / Fisher 精确检验。
+- 年龄的 Welch t 检验与 Mann-Whitney U 检验。
+- 多变量 logistic 回归、OR 与 95% CI 输出。
+- ROC/AUC、5 折交叉验证 AUC、最佳阈值和图形导出。
 
 从仓库根目录先安装示例依赖，再运行分析：
 
 ```bash
 python3 -m pip install -r requirements.txt
-python3 example/lung-cancer/analysis/analysis.py
+python3 example/lung-cancer/analysis/lung_cancer_analysis.py
 ```
+
+分析结果会写入 `example/lung-cancer/analysis/outputs/kaggle_survey/`。当前示例输出包括 Table 1、检验结果、logistic 回归 OR 表、ROC 阈值表和多张 PNG 图。一次示例运行得到的 5 折交叉验证 AUC 为 `0.9397`，显著的多变量 logistic 回归预测因子包括 smoking、peer pressure、chronic disease、fatigue、allergy、coughing 和 swallowing difficulty。
+
+代表性输出图：
+
+![Adjusted odds ratio forest plot](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig2_forest_plot_OR.png)
+
+![ROC curve](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig3_roc_curve.png)
 
 ## 安装
 
