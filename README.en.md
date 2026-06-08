@@ -58,9 +58,9 @@ Results are written to `example/lung-cancer/analysis/outputs/kaggle_survey/`. Th
 
 Representative output figures:
 
-![Adjusted odds ratio forest plot](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig2_forest_plot_OR.png)
+![Adjusted odds ratio forest plot](docs/assets/example-figures/fig2_forest_plot_OR.png)
 
-![ROC curve](example/lung-cancer/analysis/outputs/kaggle_survey/figures/fig3_roc_curve.png)
+![ROC curve](docs/assets/example-figures/fig3_roc_curve.png)
 
 ## Install
 

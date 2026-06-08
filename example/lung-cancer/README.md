@@ -58,9 +58,9 @@ The checked-in output snapshot reports:
 
 Representative figures:
 
-![Adjusted odds ratio forest plot](analysis/outputs/kaggle_survey/figures/fig2_forest_plot_OR.png)
+![Adjusted odds ratio forest plot](../../docs/assets/example-figures/fig2_forest_plot_OR.png)
 
-![ROC curve](analysis/outputs/kaggle_survey/figures/fig3_roc_curve.png)
+![ROC curve](../../docs/assets/example-figures/fig3_roc_curve.png)
 
 ## Data Note
 
