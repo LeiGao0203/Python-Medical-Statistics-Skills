@@ -46,6 +46,8 @@ The recommended Python stack includes:
 - Welch t-test and Mann-Whitney U test for age.
 - Multivariable logistic regression with OR and 95% CI output.
 - ROC/AUC, 5-fold cross-validated AUC, optimal threshold, and exported figures.
+- Predictor correlation heatmap, PCA risk-pattern map, and subgroup odds-ratio forest plot.
+- Calibration curve, risk decile table, symptom clustermap, model comparison, and permutation importance.
 
 From the repository root, install the example dependencies first and then run the analysis:
 
@@ -54,7 +56,9 @@ python3 -m pip install -r requirements.txt
 python3 example/lung-cancer/analysis/lung_cancer_analysis.py
 ```
 
-Results are written to `example/lung-cancer/analysis/outputs/kaggle_survey/`. The current example outputs include Table 1, statistical test results, logistic regression ORs, ROC threshold tables, and PNG figures. One example run produced a 5-fold cross-validated AUC of `0.9397`; significant multivariable logistic regression predictors included smoking, peer pressure, chronic disease, fatigue, allergy, coughing, and swallowing difficulty.
+Results are written to `example/lung-cancer/analysis/outputs/kaggle_survey/`. The current example outputs include Table 1, statistical test results, logistic regression ORs, ROC threshold tables, correlation matrices, PCA loadings, calibration tables, risk deciles, subgroup odds ratios, model comparison, permutation importance, and 9 PNG figures.
+
+One example run produced a 5-fold cross-validated logistic AUC of `0.9397`, an apparent logistic AUC of `0.9674`, and a random forest 5-fold cross-validated AUC of `0.9168`. Significant multivariable logistic regression predictors included smoking, peer pressure, chronic disease, fatigue, allergy, coughing, and swallowing difficulty. The first two PCA components explained about `32.0%` of predictor variance; the highest random forest permutation-importance variables included allergy, swallowing difficulty, peer pressure, alcohol consuming, and fatigue.
 
 Representative output figures:
 

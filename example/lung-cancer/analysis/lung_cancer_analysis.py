@@ -12,8 +12,17 @@ import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from sklearn.calibration import calibration_curve
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import brier_score_loss, log_loss
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.model_selection import cross_val_predict, StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
@@ -251,7 +260,15 @@ print(f"\nSaved: {TABLE_DIR / 'age_ttest_results.csv'}")
 
 # %% Figure 1: Age Distribution Boxplot
 fig, ax = plt.subplots(figsize=(7, 5))
-sns.boxplot(data=df, x="LUNG_CANCER", y="AGE", palette=["#4ECDC4", "#FF6B6B"], ax=ax)
+sns.boxplot(
+    data=df,
+    x="LUNG_CANCER",
+    y="AGE",
+    hue="LUNG_CANCER",
+    palette={"NO": "#4ECDC4", "YES": "#FF6B6B"},
+    legend=False,
+    ax=ax,
+)
 sns.stripplot(data=df, x="LUNG_CANCER", y="AGE", color="black", alpha=0.3, size=3, jitter=True, ax=ax)
 ax.set_xlabel("Lung Cancer Status")
 ax.set_ylabel("Age (years)")
@@ -460,6 +477,367 @@ plt.savefig(FIG_DIR / "fig3_roc_curve.png", bbox_inches="tight")
 plt.close()
 print(f"Saved: {FIG_DIR / 'fig3_roc_curve.png'}")
 
+# %% Advanced Exploration: Feature Correlation Matrix
+print("=== Advanced Exploration: Correlation Matrix ===")
+
+feature_frame = df_model[predictor_cols_clean].copy()
+feature_frame_labeled = feature_frame.rename(columns=var_label_map)
+feature_labels = feature_frame_labeled.columns.tolist()
+
+correlation_matrix = feature_frame_labeled.corr(method="spearman")
+correlation_matrix.to_csv(TABLE_DIR / "correlation_matrix.csv")
+print(f"Saved: {TABLE_DIR / 'correlation_matrix.csv'}")
+
+fig, ax = plt.subplots(figsize=(10, 8))
+sns.heatmap(
+    correlation_matrix,
+    cmap="vlag",
+    center=0,
+    vmin=-1,
+    vmax=1,
+    linewidths=0.4,
+    square=True,
+    cbar_kws={"label": "Spearman correlation"},
+    ax=ax,
+)
+ax.set_title("Spearman Correlation Matrix of Predictors")
+ax.tick_params(axis="x", labelrotation=45)
+ax.tick_params(axis="y", labelrotation=0)
+plt.tight_layout()
+plt.savefig(FIG_DIR / "fig4_correlation_heatmap.png", bbox_inches="tight")
+plt.close()
+print(f"Saved: {FIG_DIR / 'fig4_correlation_heatmap.png'}")
+
+# %% Advanced Exploration: PCA Symptom Pattern Map
+print("=== Advanced Exploration: PCA ===")
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(feature_frame)
+pca = PCA(n_components=2)
+pca_scores = pca.fit_transform(X_scaled)
+
+pca_variance = pd.DataFrame({
+    "Component": ["PC1", "PC2"],
+    "Explained_variance_ratio": pca.explained_variance_ratio_,
+    "Cumulative_explained_variance_ratio": np.cumsum(pca.explained_variance_ratio_),
+})
+pca_variance.to_csv(TABLE_DIR / "pca_explained_variance.csv", index=False)
+
+pca_loadings = pd.DataFrame(
+    pca.components_.T,
+    columns=["PC1_loading", "PC2_loading"],
+    index=feature_labels,
+).reset_index(names="Variable")
+pca_loadings["Loading_norm"] = np.sqrt(
+    pca_loadings["PC1_loading"] ** 2 + pca_loadings["PC2_loading"] ** 2
+)
+pca_loadings.to_csv(TABLE_DIR / "pca_loadings.csv", index=False)
+print(f"Saved: {TABLE_DIR / 'pca_explained_variance.csv'}")
+print(f"Saved: {TABLE_DIR / 'pca_loadings.csv'}")
+
+pca_plot = pd.DataFrame({
+    "PC1": pca_scores[:, 0],
+    "PC2": pca_scores[:, 1],
+    "Lung cancer": df["LUNG_CANCER"].values,
+})
+
+fig, ax = plt.subplots(figsize=(8, 7))
+sns.scatterplot(
+    data=pca_plot,
+    x="PC1",
+    y="PC2",
+    hue="Lung cancer",
+    palette={"NO": "#4ECDC4", "YES": "#FF6B6B"},
+    alpha=0.75,
+    s=42,
+    edgecolor="white",
+    linewidth=0.3,
+    ax=ax,
+)
+
+top_loadings = pca_loadings.sort_values("Loading_norm", ascending=False).head(8)
+arrow_scale = 3.0
+for _, row in top_loadings.iterrows():
+    ax.arrow(
+        0,
+        0,
+        row["PC1_loading"] * arrow_scale,
+        row["PC2_loading"] * arrow_scale,
+        color="dimgray",
+        alpha=0.7,
+        head_width=0.08,
+        length_includes_head=True,
+    )
+    ax.text(
+        row["PC1_loading"] * arrow_scale * 1.08,
+        row["PC2_loading"] * arrow_scale * 1.08,
+        row["Variable"],
+        fontsize=7,
+        color="black",
+    )
+
+ax.axhline(0, color="gray", linewidth=0.8, linestyle=":")
+ax.axvline(0, color="gray", linewidth=0.8, linestyle=":")
+ax.set_xlabel(f"PC1 ({pca.explained_variance_ratio_[0] * 100:.1f}% variance)")
+ax.set_ylabel(f"PC2 ({pca.explained_variance_ratio_[1] * 100:.1f}% variance)")
+ax.set_title("PCA Biplot of Survey Risk-Factor Patterns")
+ax.legend(title="Lung cancer", loc="best")
+plt.tight_layout()
+plt.savefig(FIG_DIR / "fig5_pca_biplot.png", bbox_inches="tight")
+plt.close()
+print(f"Saved: {FIG_DIR / 'fig5_pca_biplot.png'}")
+
+# %% Advanced Modeling: Subgroup Odds Ratios
+print("=== Advanced Modeling: Subgroup Odds Ratios ===")
+
+def unadjusted_or_ci(data, predictor_col, outcome_col):
+    table = pd.crosstab(data[predictor_col], data[outcome_col]).reindex(
+        index=[0, 1], columns=[0, 1], fill_value=0
+    )
+    exposed_cases = table.loc[1, 1] + 0.5
+    exposed_controls = table.loc[1, 0] + 0.5
+    unexposed_cases = table.loc[0, 1] + 0.5
+    unexposed_controls = table.loc[0, 0] + 0.5
+
+    odds_ratio = (exposed_cases * unexposed_controls) / (exposed_controls * unexposed_cases)
+    se_log_or = np.sqrt(
+        (1 / exposed_cases)
+        + (1 / exposed_controls)
+        + (1 / unexposed_cases)
+        + (1 / unexposed_controls)
+    )
+    ci_low = np.exp(np.log(odds_ratio) - 1.96 * se_log_or)
+    ci_high = np.exp(np.log(odds_ratio) + 1.96 * se_log_or)
+    return odds_ratio, ci_low, ci_high, int(table.values.sum())
+
+
+top_subgroup_predictors = (
+    chi2_df.sort_values("p_value")["Variable"]
+    .head(5)
+    .map({v: k for k, v in label_map.items()})
+    .dropna()
+    .tolist()
+)
+
+subgroup_definitions = [
+    ("Overall", "All participants", df.index == df.index),
+    ("Age", "Age < 65", df["AGE"] < 65),
+    ("Age", "Age >= 65", df["AGE"] >= 65),
+    ("Sex", "Female", df["GENDER_BIN"] == 0),
+    ("Sex", "Male", df["GENDER_BIN"] == 1),
+]
+
+subgroup_rows = []
+for subgroup_type, subgroup_label, mask in subgroup_definitions:
+    subgroup_df = df.loc[mask].copy()
+    for predictor in top_subgroup_predictors:
+        odds_ratio, ci_low, ci_high, n_subgroup = unadjusted_or_ci(
+            subgroup_df, predictor, "LUNG_CANCER_BIN"
+        )
+        subgroup_rows.append({
+            "Subgroup_type": subgroup_type,
+            "Subgroup": subgroup_label,
+            "Predictor": label_map.get(predictor, predictor).replace(", n (%)", ""),
+            "N": n_subgroup,
+            "OR": odds_ratio,
+            "OR_CI_low": ci_low,
+            "OR_CI_high": ci_high,
+            "OR_formatted": f"{odds_ratio:.2f} ({ci_low:.2f}-{ci_high:.2f})",
+        })
+
+subgroup_or_df = pd.DataFrame(subgroup_rows)
+subgroup_or_df.to_csv(TABLE_DIR / "subgroup_odds_ratios.csv", index=False)
+print(f"Saved: {TABLE_DIR / 'subgroup_odds_ratios.csv'}")
+
+subgroup_plot = subgroup_or_df.copy()
+subgroup_plot["Plot_label"] = subgroup_plot["Predictor"] + " | " + subgroup_plot["Subgroup"]
+subgroup_plot = subgroup_plot.sort_values(["Predictor", "Subgroup_type", "Subgroup"])
+
+fig, ax = plt.subplots(figsize=(9, 9))
+y_pos = np.arange(len(subgroup_plot))
+ax.errorbar(
+    subgroup_plot["OR"],
+    y_pos,
+    xerr=[
+        subgroup_plot["OR"] - subgroup_plot["OR_CI_low"],
+        subgroup_plot["OR_CI_high"] - subgroup_plot["OR"],
+    ],
+    fmt="o",
+    color="#1F4E79",
+    ecolor="#8FAADC",
+    elinewidth=1.6,
+    capsize=3,
+)
+ax.axvline(1, color="red", linestyle="--", linewidth=1)
+ax.set_xscale("log")
+ax.set_yticks(y_pos)
+ax.set_yticklabels(subgroup_plot["Plot_label"], fontsize=7)
+ax.set_xlabel("Unadjusted Odds Ratio (log scale)")
+ax.set_title("Subgroup Forest Plot for Top Chi-Square Predictors")
+ax.grid(axis="x", alpha=0.25)
+plt.tight_layout()
+plt.savefig(FIG_DIR / "fig6_subgroup_forest.png", bbox_inches="tight")
+plt.close()
+print(f"Saved: {FIG_DIR / 'fig6_subgroup_forest.png'}")
+
+# %% Advanced Model Evaluation: Calibration and Risk Distribution
+print("=== Advanced Model Evaluation: Calibration and Risk Distribution ===")
+
+prob_true, prob_pred = calibration_curve(y, y_cv_prob, n_bins=5, strategy="quantile")
+calibration_table = pd.DataFrame({
+    "Mean_predicted_probability": prob_pred,
+    "Observed_event_fraction": prob_true,
+    "Absolute_calibration_error": np.abs(prob_true - prob_pred),
+})
+calibration_table.to_csv(TABLE_DIR / "calibration_table.csv", index=False)
+
+risk_table = pd.DataFrame({
+    "Predicted_probability": y_cv_prob,
+    "Observed_lung_cancer": y,
+})
+risk_table["Risk_decile"] = pd.qcut(
+    risk_table["Predicted_probability"], q=10, labels=False, duplicates="drop"
+) + 1
+risk_deciles = (
+    risk_table.groupby("Risk_decile", observed=True)
+    .agg(
+        N=("Observed_lung_cancer", "size"),
+        Mean_predicted_probability=("Predicted_probability", "mean"),
+        Observed_event_rate=("Observed_lung_cancer", "mean"),
+        Events=("Observed_lung_cancer", "sum"),
+    )
+    .reset_index()
+)
+risk_deciles.to_csv(TABLE_DIR / "risk_deciles.csv", index=False)
+print(f"Saved: {TABLE_DIR / 'calibration_table.csv'}")
+print(f"Saved: {TABLE_DIR / 'risk_deciles.csv'}")
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+axes[0].plot([0, 1], [0, 1], color="gray", linestyle=":", label="Perfect calibration")
+axes[0].plot(
+    calibration_table["Mean_predicted_probability"],
+    calibration_table["Observed_event_fraction"],
+    marker="o",
+    color="#1F77B4",
+    linewidth=2,
+    label="5-bin observed rate",
+)
+axes[0].set_xlabel("Mean predicted probability")
+axes[0].set_ylabel("Observed lung cancer fraction")
+axes[0].set_title("Calibration Curve (5-Fold CV Predictions)")
+axes[0].legend(loc="upper left")
+axes[0].grid(alpha=0.25)
+
+sns.histplot(
+    data=pd.DataFrame({"Probability": y_cv_prob, "Lung cancer": df["LUNG_CANCER"].values}),
+    x="Probability",
+    hue="Lung cancer",
+    bins=16,
+    stat="density",
+    common_norm=False,
+    element="step",
+    palette={"NO": "#4ECDC4", "YES": "#FF6B6B"},
+    ax=axes[1],
+)
+axes[1].axvline(optimal_threshold, color="black", linestyle="--", linewidth=1)
+axes[1].set_xlabel("Cross-validated predicted probability")
+axes[1].set_title("Risk Score Distribution by Outcome")
+plt.tight_layout()
+plt.savefig(FIG_DIR / "fig7_calibration_distribution.png", bbox_inches="tight")
+plt.close()
+print(f"Saved: {FIG_DIR / 'fig7_calibration_distribution.png'}")
+
+# %% Advanced Exploration: Symptom Clustering
+print("=== Advanced Exploration: Symptom Clustering ===")
+
+cluster_features = df[binary_vars].rename(columns={c: label_map.get(c, c).replace(", n (%)", "") for c in binary_vars})
+cluster_matrix = cluster_features.corr(method="spearman")
+cluster_grid = sns.clustermap(
+    cluster_matrix,
+    cmap="vlag",
+    center=0,
+    vmin=-1,
+    vmax=1,
+    linewidths=0.4,
+    figsize=(9, 9),
+    cbar_kws={"label": "Spearman correlation"},
+)
+cluster_grid.fig.suptitle("Clustered Symptom Correlation Map", y=1.02)
+cluster_grid.savefig(FIG_DIR / "fig8_clustermap.png", bbox_inches="tight")
+plt.close(cluster_grid.fig)
+print(f"Saved: {FIG_DIR / 'fig8_clustermap.png'}")
+
+# %% Advanced Model Comparison and Feature Importance
+print("=== Advanced Model Comparison and Feature Importance ===")
+
+rf = RandomForestClassifier(
+    n_estimators=300,
+    min_samples_leaf=8,
+    class_weight="balanced",
+    random_state=42,
+)
+rf_cv_prob = cross_val_predict(rf, X, y, cv=cv, method="predict_proba")[:, 1]
+
+model_comparison = pd.DataFrame([
+    {
+        "Model": "Statsmodels logistic regression (apparent)",
+        "AUC": auc_train,
+        "Brier_score": brier_score_loss(y, y_pred_prob),
+        "Log_loss": log_loss(y, y_pred_prob),
+        "Validation": "Apparent",
+    },
+    {
+        "Model": "Sklearn logistic regression",
+        "AUC": auc_cv,
+        "Brier_score": brier_score_loss(y, y_cv_prob),
+        "Log_loss": log_loss(y, y_cv_prob),
+        "Validation": "5-fold cross-validation",
+    },
+    {
+        "Model": "Random forest",
+        "AUC": roc_auc_score(y, rf_cv_prob),
+        "Brier_score": brier_score_loss(y, rf_cv_prob),
+        "Log_loss": log_loss(y, rf_cv_prob),
+        "Validation": "5-fold cross-validation",
+    },
+])
+model_comparison.to_csv(TABLE_DIR / "model_comparison.csv", index=False)
+print(f"Saved: {TABLE_DIR / 'model_comparison.csv'}")
+
+rf.fit(X, y)
+importance = permutation_importance(
+    rf,
+    X,
+    y,
+    n_repeats=25,
+    random_state=42,
+    scoring="roc_auc",
+)
+importance_df = pd.DataFrame({
+    "Variable": feature_labels,
+    "Permutation_importance_mean": importance.importances_mean,
+    "Permutation_importance_sd": importance.importances_std,
+}).sort_values("Permutation_importance_mean", ascending=False)
+importance_df.to_csv(TABLE_DIR / "permutation_importance.csv", index=False)
+print(f"Saved: {TABLE_DIR / 'permutation_importance.csv'}")
+
+importance_plot = importance_df.head(12).sort_values("Permutation_importance_mean", ascending=True)
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.barh(
+    importance_plot["Variable"],
+    importance_plot["Permutation_importance_mean"],
+    xerr=importance_plot["Permutation_importance_sd"],
+    color="#2A9D8F",
+    alpha=0.85,
+)
+ax.set_xlabel("Mean AUC decrease after permutation")
+ax.set_title("Random Forest Permutation Importance")
+ax.grid(axis="x", alpha=0.25)
+plt.tight_layout()
+plt.savefig(FIG_DIR / "fig9_permutation_importance.png", bbox_inches="tight")
+plt.close()
+print(f"Saved: {FIG_DIR / 'fig9_permutation_importance.png'}")
+
 # %% Summary
 print("\n" + "=" * 60)
 print("ANALYSIS COMPLETE")
@@ -476,6 +854,9 @@ print(f"  • Significant logistic regression predictors ({len(sig_or)}):")
 for _, row in sig_or.iterrows():
     print(f"      {row['Label']}: OR={row['OR']:.2f} (p={row['p_value']:.4f})")
 print(f"  • Model AUC: {auc_train:.3f} (apparent), {auc_cv:.3f} (5-fold CV)")
+best_model = model_comparison.sort_values("AUC", ascending=False).iloc[0]
+print(f"  • Best AUC in model comparison: {best_model['Model']} ({best_model['AUC']:.3f})")
+print(f"  • Top permutation predictor: {importance_df.iloc[0]['Variable']}")
 
 print(f"\nOutputs saved to:")
 print(f"  Tables: {TABLE_DIR}")

@@ -46,6 +46,8 @@ Python Medical Statistics Skills 是一组面向 AI coding agent 的医学统计
 - 年龄的 Welch t 检验与 Mann-Whitney U 检验。
 - 多变量 logistic 回归、OR 与 95% CI 输出。
 - ROC/AUC、5 折交叉验证 AUC、最佳阈值和图形导出。
+- 预测因子相关性热图、PCA 风险模式图、分层 OR 森林图。
+- 校准曲线、风险分位表、症状聚类图、模型比较和 permutation importance。
 
 从仓库根目录先安装示例依赖，再运行分析：
 
@@ -54,7 +56,9 @@ python3 -m pip install -r requirements.txt
 python3 example/lung-cancer/analysis/lung_cancer_analysis.py
 ```
 
-分析结果会写入 `example/lung-cancer/analysis/outputs/kaggle_survey/`。当前示例输出包括 Table 1、检验结果、logistic 回归 OR 表、ROC 阈值表和多张 PNG 图。一次示例运行得到的 5 折交叉验证 AUC 为 `0.9397`，显著的多变量 logistic 回归预测因子包括 smoking、peer pressure、chronic disease、fatigue、allergy、coughing 和 swallowing difficulty。
+分析结果会写入 `example/lung-cancer/analysis/outputs/kaggle_survey/`。当前示例输出包括 Table 1、检验结果、logistic 回归 OR 表、ROC 阈值表、相关性矩阵、PCA 载荷、校准表、风险分位表、分层 OR 表、模型比较表、置换重要性表和 9 张 PNG 图。
+
+一次示例运行得到的 5 折交叉验证 logistic AUC 为 `0.9397`，表观 logistic AUC 为 `0.9674`，随机森林 5 折交叉验证 AUC 为 `0.9168`。显著的多变量 logistic 回归预测因子包括 smoking、peer pressure、chronic disease、fatigue、allergy、coughing 和 swallowing difficulty。PCA 前两个主成分解释约 `32.0%` 的预测因子方差；随机森林置换重要性最高的变量包括 allergy、swallowing difficulty、peer pressure、alcohol consuming 和 fatigue。
 
 代表性输出图：
 
